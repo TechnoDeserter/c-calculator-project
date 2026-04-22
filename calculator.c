@@ -1,8 +1,18 @@
 #include <stdio.h>
-#include <stdlib.h>
+
+static FILE *open_file(const char *path, const char *mode) {
+    FILE *file = NULL;
+#ifdef _MSC_VER
+    fopen_s(&file, path, mode);
+#else
+    file = fopen(path, mode);
+#endif
+    return file;
+}
+
 
 void show_history() {
-    FILE *logFile = fopen("calculations.log", "r");
+    FILE *logFile = open_file("calculations.log", "r");
     if (logFile == NULL) {
         printf("No history yet! Do some calculations first.\n\n");
         return;
@@ -58,7 +68,7 @@ int main() {
             printf("Result: %.2f\n\n", result);
 
             // Save to log (same logging you already understand)
-            FILE *logFile = fopen("calculations.log", "a");
+            FILE *logFile = open_file("calculations.log", "a");
             if (logFile != NULL) {
                 fprintf(logFile, "%.2f %c %.2f = %.2f\n", num1, operator, num2, result);
                 fclose(logFile);
