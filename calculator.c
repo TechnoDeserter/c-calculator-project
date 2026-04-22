@@ -50,6 +50,18 @@ static int read_menu_choice(void) {
     return choice;
 }
 
+static int read_double_input(const char *prompt, double *value) {
+    while (1) {
+        printf("%s", prompt);
+        if (scan_double("%lf", value) == 1) {
+            clear_input_buffer();
+            return 1;
+        }
+        printf("Invalid number. Please try again.\n");
+        clear_input_buffer();
+    }
+}
+
 static void show_menu(void) {
     printf("========================================\n");
     printf("1. New Calculation\n");
@@ -103,14 +115,12 @@ int main() {
 
         switch (choice) {
             case 1:
-                printf("\nEnter first number: ");
-                scan_double("%lf", &num1);
+                read_double_input("\nEnter first number: ", &num1);
 
                 printf("Enter operator (+, -, *, /): ");
                 scan_operator(&operator);
 
-                printf("Enter second number: ");
-                scan_double("%lf", &num2);
+                read_double_input("Enter second number: ", &num2);
 
                 switch (operator) {
                     case '+':
