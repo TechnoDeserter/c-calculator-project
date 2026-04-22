@@ -34,6 +34,42 @@ static int scan_operator(char *value) {
 #endif
 }
 
+static void clear_input_buffer(void) {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) {
+    }
+}
+
+static int read_menu_choice(void) {
+    int choice;
+    if (scan_int("%d", &choice) != 1) {
+        clear_input_buffer();
+        return -1;
+    }
+    clear_input_buffer();
+    return choice;
+}
+
+static void show_menu(void) {
+    printf("========================================\n");
+    printf("1. New Calculation\n");
+    printf("2. Show History\n");
+    printf("3. Clear History\n");
+    printf("0. Quit\n");
+    printf("========================================\n");
+    printf("Choose an option: ");
+}
+
+void clear_history() {
+    FILE *logFile = open_file("calculations.log", "w");
+    if (logFile == NULL) {
+        printf("Unable to clear history right now.\n\n");
+        return;
+    }
+    fclose(logFile);
+    printf("History cleared successfully.\n\n");
+}
+
 
 void show_history() {
     FILE *logFile = open_file("calculations.log", "r");
@@ -58,11 +94,12 @@ int main() {
     printf("=== Mika's Professional C Calculator (Version 2) ===\n\n");
 
     while (choice != 0) {
-        printf("1. New Calculation\n");
-        printf("2. Show History\n");
-        printf("0. Quit\n");
-        printf("Choose an option: ");
-        scan_int("%d", &choice);
+        show_menu();
+        choice = read_menu_choice();
+        if (choice == -1) {
+            printf("Invalid option! Please enter a number from the menu.\n\n");
+            continue;
+        }
 
         switch (choice) {
             case 1:
@@ -111,12 +148,16 @@ int main() {
                 show_history();
                 break;
 
+            case 3:
+                clear_history();
+                break;
+
             case 0:
                 printf("Thank you for using the calculator!\n");
                 break;
 
             default:
-                printf("Invalid option! Try 0, 1 or 2.\n\n");
+                printf("Invalid option! Try 0, 1, 2 or 3.\n\n");
                 break;
         }
     }
