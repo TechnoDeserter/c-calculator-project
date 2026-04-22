@@ -10,6 +10,30 @@ static FILE *open_file(const char *path, const char *mode) {
     return file;
 }
 
+static int scan_int(const char *format, int *value) {
+#ifdef _MSC_VER
+    return scanf_s(format, value);
+#else
+    return scanf(format, value);
+#endif
+}
+
+static int scan_double(const char *format, double *value) {
+#ifdef _MSC_VER
+    return scanf_s(format, value);
+#else
+    return scanf(format, value);
+#endif
+}
+
+static int scan_operator(char *value) {
+#ifdef _MSC_VER
+    return scanf_s(" %c", value, 1);
+#else
+    return scanf(" %c", value);
+#endif
+}
+
 
 void show_history() {
     FILE *logFile = open_file("calculations.log", "r");
@@ -38,48 +62,62 @@ int main() {
         printf("2. Show History\n");
         printf("0. Quit\n");
         printf("Choose an option: ");
-        scanf("%d", &choice);
+        scan_int("%d", &choice);
 
-        if (choice == 1) {
-            printf("\nEnter first number: ");
-            scanf("%lf", &num1);
+        switch (choice) {
+            case 1:
+                printf("\nEnter first number: ");
+                scan_double("%lf", &num1);
 
-            printf("Enter operator (+, -, *, /): ");
-            scanf(" %c", &operator);
+                printf("Enter operator (+, -, *, /): ");
+                scan_operator(&operator);
 
-            printf("Enter second number: ");
-            scanf("%lf", &num2);
+                printf("Enter second number: ");
+                scan_double("%lf", &num2);
 
-            if (operator == '+')      result = num1 + num2;
-            else if (operator == '-') result = num1 - num2;
-            else if (operator == '*') result = num1 * num2;
-            else if (operator == '/') {
-                if (num2 == 0) {
-                    printf("Error: Cannot divide by zero!\n\n");
-                    continue;
+                switch (operator) {
+                    case '+':
+                        result = num1 + num2;
+                        break;
+                    case '-':
+                        result = num1 - num2;
+                        break;
+                    case '*':
+                        result = num1 * num2;
+                        break;
+                    case '/':
+                        if (num2 == 0) {
+                            printf("Error: Cannot divide by zero!\n\n");
+                            continue;
+                        }
+                        result = num1 / num2;
+                        break;
+                    default:
+                        printf("Invalid operator! Use +, -, *, or /\n\n");
+                        continue;
                 }
-                result = num1 / num2;
-            }
-            else {
-                printf("Invalid operator! Use +, -, *, or /\n\n");
-                continue;
-            }
 
-            printf("Result: %.2f\n\n", result);
+                printf("Result: %.2f\n\n", result);
 
-            // Save to log (same logging you already understand)
-            FILE *logFile = open_file("calculations.log", "a");
-            if (logFile != NULL) {
-                fprintf(logFile, "%.2f %c %.2f = %.2f\n", num1, operator, num2, result);
-                fclose(logFile);
-            }
+                // Save to log (same logging you already understand)
+                FILE *logFile = open_file("calculations.log", "a");
+                if (logFile != NULL) {
+                    fprintf(logFile, "%.2f %c %.2f = %.2f\n", num1, operator, num2, result);
+                    fclose(logFile);
+                }
+                break;
 
-        } else if (choice == 2) {
-            show_history();
-        } else if (choice == 0) {
-            printf("Thank you for using the calculator!\n");
-        } else {
-            printf("Invalid option! Try 0, 1 or 2.\n\n");
+            case 2:
+                show_history();
+                break;
+
+            case 0:
+                printf("Thank you for using the calculator!\n");
+                break;
+
+            default:
+                printf("Invalid option! Try 0, 1 or 2.\n\n");
+                break;
         }
     }
 
